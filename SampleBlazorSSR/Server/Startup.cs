@@ -1,11 +1,12 @@
+using System;
+using System.Net.Http;
+
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using System.Linq;
 
 namespace SampleBlazorSSR.Server
 {
@@ -22,6 +23,14 @@ namespace SampleBlazorSSR.Server
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddScoped(s =>
+            {
+                var navigationManager = s.GetRequiredService<NavigationManager>();
+                return new HttpClient
+                {
+                    BaseAddress = new Uri(navigationManager.BaseUri)
+                };
+            });
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -52,7 +61,7 @@ namespace SampleBlazorSSR.Server
             {
                 endpoints.MapRazorPages();
                 endpoints.MapControllers();
-                endpoints.MapFallbackToFile("index.html");
+                endpoints.MapFallbackToPage("/Index");
             });
         }
     }
